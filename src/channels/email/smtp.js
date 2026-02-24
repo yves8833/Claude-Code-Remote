@@ -367,8 +367,9 @@ class EmailChannel extends NotificationChannel {
         const templates = {
             completed: {
                 subject: '[Claude-Code-Remote #{{token}}] Claude Code Task Completed - {{project}}',
-                html: `
-                <div style="font-family: 'Consolas', 'Monaco', 'Courier New', monospace; background-color: #f5f5f5; padding: 0; margin: 0;">
+                html: `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="color-scheme" content="dark only"><meta name="supported-color-schemes" content="dark only"><style>:root{color-scheme:dark only}body,.body{background-color:#121212!important;margin:0;padding:0}</style></head><body bgcolor="#121212" style="background-color:#121212;margin:0;padding:0;">
+                <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#121212" style="background-color:#121212;margin:0;padding:0;">
+                <tr><td align="center" style="padding: 20px 0; font-family: 'Consolas', 'Monaco', 'Courier New', monospace;">
                     <div style="max-width: 900px; margin: 0 auto; background-color: #1e1e1e; border: 1px solid #333; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);">
                         <!-- Terminal Header -->
                         <div style="background-color: #2d2d2d; padding: 10px 15px; border-bottom: 1px solid #444;">
@@ -431,8 +432,9 @@ class EmailChannel extends NotificationChannel {
                             {{executionTraceSection}}
                         </div>
                     </div>
-                </div>
-                `,
+                </td></tr>
+                </table>
+                </body></html>`,
                 text: `
 [Claude-Code-Remote #{{token}}] Claude Code Task Completed - {{projectDir}} | {{shortQuestion}}
 
@@ -462,8 +464,9 @@ Security Note: Please do not forward this email, session will automatically expi
             },
             waiting: {
                 subject: '[Claude-Code-Remote #{{token}}] Claude Code Waiting for Input - {{project}}',
-                html: `
-                <div style="font-family: 'Consolas', 'Monaco', 'Courier New', monospace; background-color: #f5f5f5; padding: 0; margin: 0;">
+                html: `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="color-scheme" content="dark only"><meta name="supported-color-schemes" content="dark only"><style>:root{color-scheme:dark only}body,.body{background-color:#121212!important;margin:0;padding:0}</style></head><body bgcolor="#121212" style="background-color:#121212;margin:0;padding:0;">
+                <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#121212" style="background-color:#121212;margin:0;padding:0;">
+                <tr><td align="center" style="padding: 20px 0; font-family: 'Consolas', 'Monaco', 'Courier New', monospace;">
                     <div style="max-width: 900px; margin: 0 auto; background-color: #1e1e1e; border: 1px solid #333; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);">
                         <!-- Terminal Header -->
                         <div style="background-color: #2d2d2d; padding: 10px 15px; border-bottom: 1px solid #444;">
@@ -525,8 +528,9 @@ Security Note: Please do not forward this email, session will automatically expi
                             </div>
                         </div>
                     </div>
-                </div>
-                `,
+                </td></tr>
+                </table>
+                </body></html>`,
                 text: `
 [Claude-Code-Remote #{{token}}] Claude Code Waiting for Input - {{projectDir}}
 

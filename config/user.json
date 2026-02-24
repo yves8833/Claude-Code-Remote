@@ -17,11 +17,17 @@
     }
   },
   "relay": {
-    "enabled": false,
+    "enabled": true,
     "port": 3000,
     "auth": {
       "enabled": false,
       "token": null
     }
+  },
+  "claude": {
+    "bin": "claude",
+    "flags": ["--dangerously-skip-permissions"],
+    "tmuxSession": "claude-code-remote",
+    "cwd": null
   }
 }

@@ -236,8 +236,7 @@ async function injectCommandRemote(token, command) {
         
         // Method 1: Prefer tmux unattended injection
         const TmuxInjector = require('./tmux-injector');
-        const tmuxSessionName = session.tmuxSession || 'claude-taskping';
-        const tmuxInjector = new TmuxInjector(log, tmuxSessionName);
+        const tmuxInjector = new TmuxInjector(log, session.tmuxSession || null);
         
         const tmuxResult = await tmuxInjector.injectCommandFull(token, command);
         
@@ -578,21 +577,25 @@ function startImap() {
     });
 }
 
-// Process existing emails
+// Process existing emails (only recent Claude-Code-Remote replies, not all UNSEEN)
 function processExistingEmails(imap) {
-    // Search unread emails
-    imap.search(['UNSEEN'], function(err, results) {
+    // Only search recent unread emails with Claude-Code-Remote in subject
+    // This avoids scanning tens of thousands of old unread emails
+    const since = new Date();
+    since.setHours(since.getHours() - 24);
+    const sinceStr = since.toISOString().split('T')[0];
+
+    imap.search([['SINCE', sinceStr], 'UNSEEN', ['SUBJECT', 'Claude-Code-Remote']], function(err, results) {
         if (err) {
             log.error({ error: err.message }, 'Failed to search emails');
             return;
         }
-        
+
         if (results.length > 0) {
-            log.info(`Found ${results.length} unread messages`);
-            log.debug({ uids: results }, 'Unread message UIDs');
+            log.info(`Found ${results.length} recent Claude-Code-Remote messages`);
             fetchAndProcessEmails(imap, results);
         } else {
-            log.debug('No unread messages found');
+            log.debug('No recent Claude-Code-Remote messages found');
         }
     });
 }

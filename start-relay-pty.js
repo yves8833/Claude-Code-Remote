@@ -154,6 +154,21 @@ function startService() {
     });
 }
 
+// Show Claude CLI configuration
+function showClaudeConfig() {
+    const TmuxInjector = require('./src/relay/tmux-injector');
+    const injector = new TmuxInjector(console);
+    const config = injector.getConfig();
+
+    console.log('🤖 Claude CLI configuration:');
+    console.log(`   Binary: ${config.bin}`);
+    console.log(`   Flags: ${config.flags.length > 0 ? config.flags.join(' ') : '(none)'}`);
+    console.log(`   Launch command: ${config.launchCommand}`);
+    console.log(`   Tmux session: ${config.sessionName}`);
+    console.log(`   Working directory: ${config.cwd || '(current directory)'}`);
+    console.log('');
+}
+
 // Show usage instructions
 function showInstructions() {
     console.log('📖 Usage instructions:');
@@ -167,6 +182,8 @@ function showInstructions() {
     console.log('     your command');
     console.log('     ```');
     console.log('4. System will automatically extract commands and inject them into corresponding Claude Code session');
+    console.log('\n💡 To customize Claude CLI flags, edit config/user.json → claude section');
+    console.log('   Example: { "claude": { "flags": ["--dangerously-skip-permissions"] } }');
     console.log('\n⌨️  Press Ctrl+C to stop service\n');
     console.log('━'.repeat(60) + '\n');
 }
@@ -180,13 +197,16 @@ function main() {
     
     // Check configuration
     checkConfig();
-    
+
+    // Show Claude CLI configuration
+    showClaudeConfig();
+
     // Create example session
     createExampleSession();
-    
+
     // Show usage instructions
     showInstructions();
-    
+
     // Start service
     startService();
 }

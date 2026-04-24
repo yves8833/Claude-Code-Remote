@@ -162,7 +162,7 @@ async function sendHookNotification() {
         // Desktop channel (always enabled)
         channels.push({
             name: 'Desktop',
-            channel: new DesktopChannel({ completedSound: 'Glass', waitingSound: 'Tink' })
+            channel: new DesktopChannel({ completedSound: 'Glass', waitingSound: 'Glass', volume: 5 })
         });
 
         // Telegram channel

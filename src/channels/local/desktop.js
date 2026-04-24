@@ -4,7 +4,7 @@
  */
 
 const NotificationChannel = require('../base/channel');
-const { execSync, spawn } = require('child_process');
+const { execSync, execFileSync, spawn } = require('child_process');
 const path = require('path');
 
 class DesktopChannel extends NotificationChannel {
@@ -34,27 +34,36 @@ class DesktopChannel extends NotificationChannel {
     _getSoundForType(type) {
         const soundMap = {
             completed: this.config.completedSound || 'Glass',
-            waiting: this.config.waitingSound || 'Tink'
+            waiting: this.config.waitingSound || 'Glass'
         };
         return soundMap[type] || 'Glass';
     }
 
     _sendMacOS(title, message, sound) {
+        const timeout = parseInt(process.env.NOTIFICATION_TIMEOUT) || 3000;
+        // Truncate message to avoid overly long notifications
+        const safeMessage = (message || '').substring(0, 500);
         try {
-            // Try terminal-notifier first
+            // Try terminal-notifier first — use execFileSync to avoid shell interpretation
+            // of backticks, $(), and other special characters in message content
             try {
-                const cmd = `terminal-notifier -title "${title}" -message "${message}" -sound "${sound}" -group "claude-code-remote"`;
-                execSync(cmd, { timeout: parseInt(process.env.NOTIFICATION_TIMEOUT) || 3000 });
-                return true;
+                execFileSync('terminal-notifier', [
+                    '-title', title,
+                    '-message', safeMessage,
+                    '-sound', 'default',
+                    '-group', 'claude-code-remote'
+                ], { timeout });
             } catch (e) {
-                // Fallback to osascript
-                const script = `display notification "${message}" with title "${title}"`;
-                execSync(`osascript -e '${script}'`, { timeout: parseInt(process.env.NOTIFICATION_TIMEOUT) || 3000 });
-                
-                // Play sound separately
-                this._playSound(sound);
-                return true;
+                // Fallback to osascript — escape backslashes and quotes for AppleScript
+                const escTitle = title.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+                const escMessage = safeMessage.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+                execFileSync('osascript', [
+                    '-e', `display notification "${escMessage}" with title "${escTitle}"`
+                ], { timeout });
             }
+            // Always play sound independently via afplay so it's audible even over music
+            this._playSound(sound);
+            return true;
         } catch (error) {
             this.logger.error('macOS notification failed:', error.message);
             return false;
@@ -65,7 +74,8 @@ class DesktopChannel extends NotificationChannel {
         try {
             const notificationTimeout = parseInt(process.env.NOTIFICATION_TIMEOUT) || 3000;
             const displayTime = parseInt(process.env.NOTIFICATION_DISPLAY_TIME) || 10000;
-            execSync(`notify-send "${title}" "${message}" -t ${displayTime}`, { timeout: notificationTimeout });
+            const safeMessage = (message || '').substring(0, 500);
+            execFileSync('notify-send', [title, safeMessage, '-t', String(displayTime)], { timeout: notificationTimeout });
             this._playSound(sound);
             return true;
         } catch (error) {
@@ -101,7 +111,8 @@ class DesktopChannel extends NotificationChannel {
         try {
             if (this.platform === 'darwin') {
                 const soundPath = `/System/Library/Sounds/${soundName}.aiff`;
-                const audioProcess = spawn('afplay', [soundPath], {
+                const volume = String(this.config.volume || 2);
+                const audioProcess = spawn('afplay', ['-v', volume, soundPath], {
                     detached: true,
                     stdio: 'ignore'
                 });
